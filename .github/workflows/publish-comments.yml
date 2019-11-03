@@ -1,0 +1,40 @@
+name: publish-comments
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  add_comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: Turn comment into file
+        run: |
+          ID=${{ github.event.comment.id }}
+          AUTHOR=${{ github.event.comment.user.login }}
+          DATE=${{ github.event.comment.created_at }}
+          COMMENT='${{ github.event.comment.body }}'
+          NO_TAGS=${COMMENT//[<>]/\`}
+          FOLDER=comments
+
+          printf '%b\n' "<div class=\"comment\"><p>${AUTHOR} says:</p><p>${NO_TAGS//$'\n'/\<\/p\>\<p\>}</p><p>${DATE}</p></div>\r\n" > ${FOLDER}/${ID}.html
+      - name: Assemble page
+        run: |
+          cat header.html > index.html
+          find comments/ -name "*.html" | sort -r | xargs -I % cat % >> index.html
+          cat footer.html >> index.html
+      - name: Push changes to repo
+        run: |
+          REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+
+          git pull ${REMOTE}
+          git checkout master
+          git add .
+          git status
+          git commit -am "Add new comment"
+          git push ${REMOTE} master
