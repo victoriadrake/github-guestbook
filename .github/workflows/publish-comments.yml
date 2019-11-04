@@ -16,11 +16,11 @@ jobs:
           ID=${{ github.event.comment.id }}
           AUTHOR=${{ github.event.comment.user.login }}
           DATE=${{ github.event.comment.created_at }}
-          COMMENT='${{ github.event.comment.body }}'
+          COMMENT=$(echo "${{ github.event.comment.body }}")
           NO_TAGS=${COMMENT//[<>]/\`}
           FOLDER=comments
 
-          printf '%b\n' "<div class=\"comment\"><p>${AUTHOR} says:</p><p>${NO_TAGS//$'\n'/\<\/p\>\<p\>}</p><p>${DATE}</p></div>\r\n" > ${FOLDER}/${ID}.html
+          printf '%b\n' "\r\n<div class=\"comment\"><p>${AUTHOR} says:</p><p>${NO_TAGS//$'\n'/\<\/p\>\<p\>}</p><p>${DATE}</p></div>\r\n" > ${FOLDER}/${ID}.html
       - name: Assemble page
         run: |
           cat header.html > index.html
