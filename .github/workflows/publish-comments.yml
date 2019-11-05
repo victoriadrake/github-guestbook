@@ -18,14 +18,14 @@ jobs:
           DATE=${{ github.event.comment.created_at }}
           COMMENT=$(echo "${{ github.event.comment.body }}")
           NO_TAGS=${COMMENT//[<>]/\`}
-          FOLDER=comments
+          FOLDER=src/comments
 
           printf '%b\n' "\r\n<div class=\"comment\"><p>${AUTHOR} says:</p><p>${NO_TAGS//$'\n'/\<\/p\>\<p\>}</p><p>${DATE}</p></div>\r\n" > ${FOLDER}/${ID}.html
       - name: Assemble page
         run: |
-          cat header.html > index.html
-          find comments/ -name "*.html" | sort -r | xargs -I % cat % >> index.html
-          cat footer.html >> index.html
+          cat src/header.html > docs/index.html
+          find src/comments/ -name "*.html" | sort -r | xargs -I % cat % >> docs/index.html
+          cat src/footer.html >> docs/index.html
       - name: Push changes to repo
         run: |
           REMOTE=https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
