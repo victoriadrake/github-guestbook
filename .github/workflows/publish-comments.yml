@@ -27,8 +27,10 @@ jobs:
           find src/comments/ -name "*.html" | sort -r | xargs -I % cat % >> index.html
           cat src/footer.html >> index.html
       - name: Push changes to repo
+        env:
+          TOKEN: ${{ secrets.PAGES_TOKEN }}
         run: |
-          REMOTE=https://${{ secrets.PAGES_TOKEN }}@github.com/${{ github.repository }}
+          REMOTE=https://${{ secrets.TOKEN }}@github.com/${{ github.repository }}
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git config user.name "${{ github.actor }}"
 
