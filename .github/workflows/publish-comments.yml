@@ -4,6 +4,14 @@ on:
   issue_comment:
     types: [created, edited]
 
+env:
+    ID: ${{ github.event.comment.id }}
+    AUTHOR: ${{ github.event.comment.user.login }}
+    DATE: ${{ github.event.comment.created_at }}
+    COMMENT: ${{ github.event.comment.body }}
+    ISSUE_URL: ${{ github.event.comment.issue_url }}
+    FOLDER: src/comments
+
 jobs:
   add_comment:
     runs-on: ubuntu-latest
@@ -13,14 +21,7 @@ jobs:
           fetch-depth: 1
       - name: Turn comment into file
         run: |
-          ID=${{ github.event.comment.id }}
-          AUTHOR=${{ github.event.comment.user.login }}
-          DATE=${{ github.event.comment.created_at }}
-          COMMENT=$(echo "${{ github.event.comment.body }}")
-          NO_TAGS=${COMMENT//[<>]/\`}
-          FOLDER=src/comments
-
-          printf '%b\n' "\r\n<div class=\"comment\"><p>${AUTHOR} says:</p><p>${NO_TAGS//$'\n'/\<\/p\>\<p\>}</p><p>${DATE}</p></div>\r\n" > ${FOLDER}/${ID}.html
+          ./create-comment.sh
       - name: Assemble page
         run: |
           cat src/header.html > index.html
